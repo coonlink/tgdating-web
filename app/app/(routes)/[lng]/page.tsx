@@ -1,18 +1,43 @@
+/*
+✨ CoonDev • http://dev.coonlink.fun/ 
+
+ ▄█▄    ████▄ ████▄    ▄   ██▄   ▄███▄      ▄  
+ █▀ ▀▄  █   █ █   █     █  █  █  █▀   ▀      █ 
+ █   ▀  █   █ █   █ ██   █ █   █ ██▄▄   █     █
+ █▄  ▄▀ ▀████ ▀████ █ █  █ █  █  █▄   ▄▀ █    █
+ ▀███▀              █  █ █ ███▀  ▀███▀    █  █ 
+                    █   ██                 █▐  
+                                           ▐   
+*/
 "use client";
 
 import { type FC, memo } from "react";
 import type { TRootPageProps } from "@/app/pages/rootPage/types";
 import "./RootPage.scss";
-import {useNavigator} from "@/app/shared/hooks";
+import { useNavigator } from "@/app/shared/hooks";
+import { openLocationManagerSettings } from '@telegram-apps/sdk';
 
 const RootPageComponent: FC<TRootPageProps> = (props) => {
-  const navigator = useNavigator({ lng: props.lng });
+  const { requestLocation, locationManager: lmState, ...locationData } = useNavigator({ lng: props.lng });
+
   return (
     <div>
-      <div>navigator: {JSON.stringify(navigator, null, 2)}</div>
+      <div>navigator: {JSON.stringify(locationData, null, 2)}</div>
+      <div>locationManager: {JSON.stringify(lmState, null, 2)}</div>
       <div>
-        <button onClick={navigator.getFromNavigator}>request location from navigator</button>
+        <button onClick={requestLocation}>Request Location</button>
       </div>
+      {lmState.isSupported && !lmState.isAvailable && (
+         <button onClick={() => {
+            if (openLocationManagerSettings.isAvailable()) {
+               try {
+                  openLocationManagerSettings();
+               } catch (err) {
+                  console.error("Failed to open settings:", err);
+               }
+            }
+         }}>Open Location Settings</button>
+      )}
     </div>
   )
 };
